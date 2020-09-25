@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
+	<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+		integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+		crossorigin="" />
+
+	<link rel="stylesheet" href="<?= base_url('assets/css/style.css') ?>">
+	<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+		integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+		crossorigin=""></script>
+	<script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.7.0/dist/alpine.min.js" defer></script>
+	<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+	<style>
+		#kota-select {
+			top: 51px;
+			width: 280px;
+			right: -1px;
+			max-height: 400px;
+		}
+
+	</style>
+	<title>Pinit</title>
+
+	<script>
+		const BASE_URL = "http://localhost/koperasi/"
+
+	</script>
+</head>
+
+<body class="text-gray-700 overflow-hidden" x-data="App">
+	<div class="grid grid-cols-12 h-screen">
+		<aside class="col-span-4 h-full bg-white shadow p-4 bg-gray-100">
+			<div class="py-3 flex justify-between">
+				<img class="w-24" src="<?= base_url('assets/images/default-monochrome.svg') ?>" alt="logo">
+
+				<div>
+					<button class="px-3 py-1 text-indigo-700 text-sm">
+						<svg xmlns="http://www.w3.org/2000/svg" class="inline w-4 h-4" fill="currentColor"
+							viewBox="0 0 24 24">
+							<circle cx="12" cy="12" r="4" />
+							<path
+								d="M13,4.069V2h-2v2.069C7.389,4.522,4.523,7.389,4.069,11H2v2h2.069c0.454,3.611,3.319,6.478,6.931,6.931V22h2v-2.069 c3.611-0.453,6.478-3.319,6.931-6.931H22v-2h-2.069C19.478,7.389,16.611,4.522,13,4.069z M12,18c-3.309,0-6-2.691-6-6s2.691-6,6-6 s6,2.691,6,6S15.309,18,12,18z" />
+						</svg>
+						temukan saya
+					</button>
+
+					<button
+						class="shadow px-4 py-1 bg-indigo-700 rounded-lg text-indigo-100 font-semibold text-sm">login</button>
+				</div>
+			</div>
+
+			<div class="border-t border-gray-200 py-3 flex flex-wrap">
+				<input type="text" class="p-2 px-4 rounded-lg shadow bg-white w-7/12 focus:outline-none font-bold"
+					placeholder="Cari koperasi">
+				<div class="relative inline">
+					<button class="shadow p-2 ml-2 rounded-lg text-sm font-semibold"
+						x-bind:class="{'bg-indigo-700 text-indigo-100': (kotaFilterComponent.open || kotaFilterComponent.selectedCity), 'text-indigo-700 bg-white': (!kotaFilterComponent.open && !kotaFilterComponent.selectedCity)  }"
+						@click="kotaFilterComponent.open = true; kotaFilterComponent.search()">
+						<svg class="w-6 h-6 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+							xmlns="http://www.w3.org/2000/svg">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z">
+							</path>
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+								d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+						</svg>
+						kota
+					</button>
+
+					<div id="kota-select"
+						class="absolute top-0 bg-white shadow rounded-lg flex flex-col items-center py-3 px-2"
+						x-show="kotaFilterComponent.open" @click.away="kotaFilterComponent.open = false">
+						<input x-model="kotaFilterComponent.input" type="text" x-on:input="kotaFilterComponent.search()"
+							class="p-2 rounded-lg border bg-gray-100 focus:outline-none font-bold text-sm w-full"
+							placeholder="masukkan nama kota">
+
+						<template x-if="kotaFilterComponent.selectedCity">
+							<div class="flex justify-between items-center w-full text-xs mt-2 ">
+								<label class="bg-indigo-600 text-indigo-100 py-1 px-2 rounded "
+									x-text="kotaFilterComponent.selectedCity.nama">
+								</label>
+								<button class="text-indigo-600" x-on:click="kotaFilterComponent.reset(); render()">
+									reset
+								</button>
+							</div>
+						</template>
+						<!-- <p x-text="kotaFilterComponent.input"></p> -->
+						<template x-if="kotaFilterComponent.options.length">
+							<ul class="w-full mt-3 overflow-y-auto">
+								<template x-for="option in kotaFilterComponent.options" :key="option.id">
+									<li>
+										<button x-text="option.nama"
+											@click.prevent="kotaFilterComponent.selectedCity = {id: option.id, nama: option.nama}; kotaFilterComponent.open = false; render()"
+											class="hover:bg-indigo-700 hover:text-indigo-100 p-1 rounded mb-1 cursor-pointer">
+										</button>
+									</li>
+								</template>
+							</ul>
+						</template>
+					</div>
+				</div>
+				<button class="shadow p-2 ml-2 text-indigo-700 rounded-lg  text-sm font-semibold bg-white">
+					<svg class="w-6 h-6 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+						xmlns="http://www.w3.org/2000/svg">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+							d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4">
+						</path>
+					</svg>
+					filter
+
+				</button>
+			</div>
+
+
+			<template x-if="kotaFilterComponent.selectedCity !== null">
+				<p class="my-5 text-lg font-bold">
+					<span x-text="features.length"></span> Hasil <span class="text-gray-500">ditemukan di <span
+							x-text="kotaFilterComponent.selectedCity.nama"></span></span>
+				</p>
+			</template>
+
+			<div class="max-h-full h-full w-full overflow-y-auto">
+				<div class="shadow bg-white rounded-lg p-2 flex flex-wrap items-center mb-3">
+					<img class="w-16 h-16 rounded-lg"
+						src="https://ui-avatars.com/api/?name=Koperasi+Ika+Cipta+Persada&background=4C51BF&color=FAF5FF"
+						alt="example-logo">
+
+					<div class="ml-4">
+						<p>Koperasi Ika Cipta Persada</p>
+						<p class="text-xs">Lorem ipsum dolor sit amet consectetur adipisicing.</p>
+						<div class="flex mt-2">
+							<span class="bg-gray-400 text-gray-600 text-xs rounded p-1 mr-1 font-bold">
+								1.7 km
+							</span>
+							<span class="bg-green-400 text-green-100 text-xs rounded p-1 font-bold">
+								<svg class="w-6 h-6 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+									xmlns="http://www.w3.org/2000/svg">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+										d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+									</path>
+								</svg>
+								kop. simpan pinjam
+							</span>
+						</div>
+					</div>
+				</div>
+				<div class="shadow bg-white rounded-lg p-2 flex flex-wrap items-center mb-3">
+					<img class="w-16 h-16 rounded-lg"
+						src="https://ui-avatars.com/api/?name=Koperasi+Ika+Cipta+Persada&background=4C51BF&color=FAF5FF"
+						alt="example-logo">
+
+					<div class="ml-4">
+						<p>Koperasi Ika Cipta Persada</p>
+						<p class="text-xs">Lorem ipsum dolor sit amet consectetur adipisicing.</p>
+						<div class="flex mt-2">
+							<span class="bg-gray-400 text-gray-600 text-xs rounded p-1 mr-1 font-bold">
+								1.7 km
+							</span>
+							<span class="bg-green-400 text-green-100 text-xs rounded p-1 font-bold">
+								<svg class="w-6 h-6 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+									xmlns="http://www.w3.org/2000/svg">
+									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+										d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+									</path>
+								</svg>
+								kop. simpan pinjam
+							</span>
+						</div>
+					</div>
+				</div>
+			</div>
+
+		</aside>
+
+		<div id="map" class="col-span-8 h-full"></div>
+	</div>
+
+	<script>
+		function app() {
+			return {
+				tokenMap: 'pk.eyJ1IjoieW9nYWFsdGFyaXoiLCJhIjoiY2tjdzI3M3k0MDl1ejJ2bGE0Y3l0M3FoeCJ9.4t6IoUSf2tqc1hjdRC7KhQ',
+				map: L.map('map').setView([5.548290, 95.323753], 13),
+				features: [],
+				mapMarkers: [],
+				addTile: function () {
+					L.tileLayer(
+						'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+							attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+							maxZoom: 18,
+							id: 'mapbox/streets-v11',
+							tileSize: 512,
+							zoomOffset: -1,
+							zoomControl: false,
+							accessToken: this.tokenMap
+						}
+					).addTo(this.map);
+				},
+				fetchKoperasi: function () {
+					const filter = {
+						kota: (this.kotaFilterComponent.selectedCity && this.kotaFilterComponent.selectedCity.id) ||
+							null,
+					}
+					return new Promise(async (resolve, reject) => {
+						try {
+							const {
+								data
+							} = await axios.get(`http://localhost/koperasi/index.php/api/koperasi`, {
+								params: filter
+							})
+							this.features = [...data.features]
+							resolve()
+						} catch (error) {
+							reject(error)
+						}
+					})
+
+				},
+				AddMarkers: function () {
+					const $this = this
+
+					return new Promise((resolve, reject) => {
+						try {
+							const customIcon = L.divIcon({
+								className: 'border-0 ',
+								html: '<svg version="1.1" class="w-8 h-8 text-indigo-700" fill="currentColor" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"y="0px" viewBox="0 0 264.018 264.018" style="enable-background:new 0 0 264.018 264.018;" xml:space="preserve"><g> <path d="M132.009,0c-42.66,0-77.366,34.706-77.366,77.366c0,11.634,2.52,22.815,7.488,33.24c0.1,0.223,0.205,0.442,0.317,0.661l58.454,113.179c2.146,4.154,6.431,6.764,11.106,6.764c4.676,0,8.961-2.609,11.106-6.764l58.438-113.148c0.101-0.195,0.195-0.392,0.285-0.591c5.001-10.455,7.536-21.67,7.536-33.341C209.375,34.706,174.669,0,132.009,0zM132.009,117.861c-22.329,0-40.495-18.166-40.495-40.495c0-22.328,18.166-40.494,40.495-40.494s40.495,18.166,40.495,40.494C172.504,99.695,154.338,117.861,132.009,117.861z" /><path d="M161.81,249.018h-59.602c-4.143,0-7.5,3.357-7.5,7.5c0,4.143,3.357,7.5,7.5,7.5h59.602c4.143,0,7.5-3.357,7.5-7.5C169.31,252.375,165.952,249.018,161.81,249.018z" /></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg>'
+							})
+
+							this.features.forEach(feature => {
+								L.geoJSON(feature, {
+									pointToLayer: function (feature, latlng) {
+										const marker = L.marker(latlng, {
+											icon: customIcon
+										});
+										$this.mapMarkers.push(marker)
+										return marker
+									},
+								}).addTo(this.map)
+							})
+							resolve()
+						} catch (error) {
+							reject(error)
+						}
+					})
+				},
+				removeMarkers: function () {
+					const $this = this
+					return new Promise((resolve, reject) => {
+						try {
+							$this.mapMarkers.forEach(marker => {
+								$this.map.removeLayer(marker)
+							})
+							resolve()
+						} catch (error) {
+							reject(error)
+						}
+					})
+				},
+				render: async function () {
+					try {
+						if (this.features.length) {
+							await this.removeMarkers()
+						}
+						await this.fetchKoperasi()
+						await this.AddMarkers()
+
+						if (this.kotaFilterComponent.selectedCity && this.features.length) {
+                            const originalFeature = JSON.parse(JSON.stringify(this.features[0]))
+                            this.map.flyTo(originalFeature.geometry.coordinates.reverse(), 16)
+						}
+
+					} catch (error) {
+						console.log(error)
+					}
+				},
+				initMap: function () {
+					this.addTile()
+					this.map.zoomControl.remove();
+					L.control.zoom({
+						position: 'bottomright'
+					}).addTo(this.map);
+					this.render()
+				},
+				kotaFilterComponent: {
+					open: false,
+					input: "",
+					options: [],
+					selectedCity: null,
+					search: function () {
+						fetch(`${BASE_URL}index.php/api/city?q=${this.input}`).then(response => response.json()).then(
+							data => this.options = data.result)
+					},
+					reset: function () {
+						this.selectedCity = null
+						this.input = null
+					}
+
+				}
+			}
+		}
+
+		const App = app()
+		App.initMap()
+		// class PinitMap {
+		//     constructor(id, view, zoomLevel) {
+		//         this.id = id
+		//         this.view = view
+		//         this.zoomLevel = zoomLevel
+		//         this.tokenMap =
+		//             'pk.eyJ1IjoieW9nYWFsdGFyaXoiLCJhIjoiY2tjdzI3M3k0MDl1ejJ2bGE0Y3l0M3FoeCJ9.4t6IoUSf2tqc1hjdRC7KhQ'
+		//         this.leaflet = L
+		//         this.map = this.leaflet.map(this.id).setView(this.view, this.zoomLevel)
+		//         this.features = null
+		//     }
+
+		//     init() {
+		//         this.leaflet.tileLayer(
+		//             'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+		//                 attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+		//                 maxZoom: 18,
+		//                 id: 'mapbox/streets-v11',
+		//                 tileSize: 512,
+		//                 zoomOffset: -1,
+		//                 zoomControl: false,
+		//                 accessToken: this.tokenMap
+		//             }
+		//         ).addTo(this.map);
+
+		//         // put control map on the bottom right
+		//         this.map.zoomControl.remove();
+		//         this.leaflet.control.zoom({
+		//             position: 'bottomright'
+		//         }).addTo(this.map);
+
+		//         this.fetchAllData().then(() => {
+		//             this.renderFeaturesToMap()
+		//         })
+		//     }
+
+		//     getFilter() {
+		//         return {
+		//             kotaFilterComponent: this.kotaFilterComponent
+		//         }
+		//     }
+
+		//     fetchAllData() {
+		//         return new Promise(async (resolve, reject) => {
+		//             try {
+		//                 const response = await fetch("/koperasi/index.php/api/koperasi/")
+		//                 const data = await response.json()
+		//                 this.features = data.features
+		//                 resolve()
+		//             } catch (error) {
+		//                 reject(error)
+		//             }
+		//         })
+		//     }
+
+		//     renderFeaturesToMap() {
+		//         const customIcon = this.leaflet.divIcon({
+		//             className: 'border-0 ',
+		//             html: '<svg version="1.1" class="w-8 h-8 text-indigo-700" fill="currentColor" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"y="0px" viewBox="0 0 264.018 264.018" style="enable-background:new 0 0 264.018 264.018;" xml:space="preserve"><g> <path d="M132.009,0c-42.66,0-77.366,34.706-77.366,77.366c0,11.634,2.52,22.815,7.488,33.24c0.1,0.223,0.205,0.442,0.317,0.661l58.454,113.179c2.146,4.154,6.431,6.764,11.106,6.764c4.676,0,8.961-2.609,11.106-6.764l58.438-113.148c0.101-0.195,0.195-0.392,0.285-0.591c5.001-10.455,7.536-21.67,7.536-33.341C209.375,34.706,174.669,0,132.009,0zM132.009,117.861c-22.329,0-40.495-18.166-40.495-40.495c0-22.328,18.166-40.494,40.495-40.494s40.495,18.166,40.495,40.494C172.504,99.695,154.338,117.861,132.009,117.861z" /><path d="M161.81,249.018h-59.602c-4.143,0-7.5,3.357-7.5,7.5c0,4.143,3.357,7.5,7.5,7.5h59.602c4.143,0,7.5-3.357,7.5-7.5C169.31,252.375,165.952,249.018,161.81,249.018z" /></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g><g></g></svg>'
+		//         })
+		//         this.features.forEach(feature => {
+		//             this.leaflet.geoJSON(feature, {
+		//                 pointToLayer: function(feature, latlng) {
+		//                     return L.marker(latlng, {
+		//                         icon: customIcon
+		//                     });
+		//                 },
+		//             }).addTo(this.map)
+		//         })
+		//     }
+		// }
+
+		// const koperasiMap = new PinitMap('map', [5.548290, 95.323753], 13)
+		// koperasiMap.init()
+
+	</script>
+</body>
+
+</html>
