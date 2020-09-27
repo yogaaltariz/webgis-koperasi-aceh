@@ -138,11 +138,15 @@
 
 			<div class="max-h-full w-full overflow-y-auto" style="height: 60%;">
 				<template x-for="(feature, i) in features" :key="i">
-					<div class="grid grid-cols-6 items-center mb-3 shadow-lg bg-white rounded-lg p-2 hover:bg-indigo-600 hover:text-indigo-100 cursor-pointer">
+					<div
+						class="grid grid-cols-6 items-center mb-3 shadow-lg bg-white rounded-lg p-2 hover:bg-indigo-600 hover:text-indigo-100 cursor-pointer"
+						:class="{'bg-indigo-600 text-indigo-100': (feature.properties.id === lookupKoperasi)}"
+						@click="(feature.properties.id === lookupKoperasi) ? null : [flyTo([...feature.geometry.coordinates].reverse()), lookupKoperasi = feature.properties.id]"
+						>
 						<div class="col-span-1">
 							<img class="w-12 h-12 rounded-lg ml-4 flex-grow flex-shrink-0"
-							:src="[`https://ui-avatars.com/api/?name=${feature.properties.name.split(' ').join('+')}&background=4C51BF&color=FAF5FF`]"
-							alt="example-logo">
+								:src="[`https://ui-avatars.com/api/?name=${feature.properties.name.split(' ').join('+')}&background=4C51BF&color=FAF5FF`]"
+								alt="example-logo">
 						</div>
 						<div class="ml-4 p-1 col-span-5">
 							<p x-text="feature.properties.name">Koperasi Ika Cipta Persada</p>
@@ -184,6 +188,7 @@
 				mapMarkers: [],
 				onFilter: false,
 				isReady: false,
+				lookupKoperasi: null,
 				addTile: function () {
 					L.tileLayer(
 						'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
@@ -232,7 +237,13 @@
 									pointToLayer: function (feature, latlng) {
 										const marker = L.marker(latlng, {
 											icon: customIcon
-										});
+										}).bindPopup(
+											"<b>Hello world!</b><br>I am a popup.").on(
+											'click',
+											function (e) {
+												console.log(JSON.parse(JSON.stringify(feature)));
+												$this.lookupKoperasi = JSON.parse(JSON.stringify(feature)).properties.id
+											});
 										$this.mapMarkers.push(marker)
 										return marker
 									},

@@ -3,7 +3,7 @@
 class KoperasiModel extends CI_Model {
 
     public function getAllKoperasi () {
-        $query = $this->db->select('kop.nama as name, kop.kelompok, kop.jenis, kop.alamat, kop.lat, kop.lon, gp.nama as gampong, kab.nama as kabupaten, kec.nama as kecamatan')
+        $query = $this->db->select('kop.id, kop.nama as name, kop.kelompok, kop.jenis, kop.alamat, kop.lat, kop.lon, gp.nama as gampong, kab.nama as kabupaten, kec.nama as kecamatan')
         ->from('koperasi_features kop')
         ->join('wilayah_kecamatan kec','kec.id = kop.kecamatan')
         ->join('wilayah_desa gp','gp.id = kop.desa')
