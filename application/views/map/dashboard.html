@@ -55,7 +55,8 @@
 			</div>
 
 			<div class="border-t border-gray-200 py-3 flex flex-wrap">
-				<input type="text" class="p-2 px-4 rounded-lg shadow bg-white w-7/12 focus:outline-none font-bold"
+				<input x-model="q" x-on:input.debounce.750="render()" type="text"
+					class="p-2 px-4 rounded-lg shadow bg-white w-7/12 focus:outline-none font-bold"
 					placeholder="Cari koperasi">
 				<div class="relative inline">
 					<button class="shadow p-2 ml-2 rounded-lg text-sm font-semibold"
@@ -116,61 +117,80 @@
 				</button>
 			</div>
 
-
-			<!-- <p class="my-5 text-lg font-bold">
-				<span x-text="features.length"></span> Hasil <span class="text-gray-500">ditemukan di dekat
-					anda</span>
-			</p> -->
-			<p class="my-5 text-lg font-bold">
-				<span x-text="features.length"></span> Hasil <span class="text-gray-500">
-					<template x-if="kotaFilterComponent.selectedCity !== null">
-						<span>
-							ditemukan di
-							<span x-text="kotaFilterComponent.selectedCity.nama"></span>
+			<template x-if="isLoading">
+				<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
+					style="margin: auto; display: block; shape-rendering: auto;"
+					width="100px" height="100px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
+					<circle cx="30" cy="50" fill="#74007a" r="20">
+						<animate attributeName="cx" repeatCount="indefinite" dur="1s" keyTimes="0;0.5;1"
+							values="30;70;30" begin="-0.5s" />
+					</circle>
+					<circle cx="70" cy="50" fill="#a53faa" r="20">
+						<animate attributeName="cx" repeatCount="indefinite" dur="1s" keyTimes="0;0.5;1"
+							values="30;70;30" begin="0s" />
+					</circle>
+					<circle cx="30" cy="50" fill="#74007a" r="20">
+						<animate attributeName="cx" repeatCount="indefinite" dur="1s" keyTimes="0;0.5;1"
+							values="30;70;30" begin="-0.5s" />
+						<animate attributeName="fill-opacity" values="0;0;1;1" calcMode="discrete"
+							keyTimes="0;0.499;0.5;1" dur="1s" repeatCount="indefinite" />
+					</circle>
+				</svg>
+			</template>
+			<template x-if="!isLoading">
+				<div>
+					<p class="my-5 text-lg font-bold">
+						<span x-text="features.length"></span> Hasil <span class="text-gray-500">
+							<template x-if="kotaFilterComponent.selectedCity !== null">
+								<span>
+									ditemukan di
+									<span x-text="kotaFilterComponent.selectedCity.nama"></span>
+								</span>
+							</template>
+							<template x-if="kotaFilterComponent.selectedCity === null">
+								<span>untuk seluruh aceh ditampilkan</span>
+							</template>
 						</span>
-					</template>
-					<template x-if="kotaFilterComponent.selectedCity === null">
-						<span>untuk seluruh aceh ditampilkan</span>
-					</template>
-				</span>
-			</p>
+					</p>
 
 
-			<div class="max-h-full w-full overflow-y-auto" style="height: 60%;">
-				<template x-for="(feature, i) in features" :key="i">
-					<div class="grid grid-cols-6 items-center mb-3 shadow-lg bg-white rounded-lg p-2 hover:bg-indigo-600 hover:text-indigo-100 cursor-pointer"
-						:class="{'bg-indigo-600 text-indigo-100': (feature.properties.id === lookupKoperasi)}"
-						@click="(feature.properties.id === lookupKoperasi) ? null : [flyTo([...feature.geometry.coordinates].reverse()), lookupKoperasi = feature.properties.id]">
-						<div class="col-span-1">
-							<img class="w-12 h-12 rounded-lg ml-4 flex-grow flex-shrink-0"
-								:src="[`https://ui-avatars.com/api/?name=${feature.properties.name.split(' ').join('+')}&background=4C51BF&color=FAF5FF`]"
-								alt="example-logo">
-						</div>
-						<div class="ml-4 p-1 col-span-5">
-							<p x-text="feature.properties.name">Koperasi Ika Cipta Persada</p>
-							<div class="text-xs break-words">
-								<span x-text="feature.properties.alamat"></span>
-								<span x-text="feature.properties.gampong"></span>,
-								<span x-text="feature.properties.kabupaten"></span>
+					<div class="max-h-full w-full overflow-y-auto" style="height: 60%;">
+						<template x-for="(feature, i) in features" :key="i">
+							<div class="grid grid-cols-6 items-center mb-3 shadow-lg bg-white rounded-lg p-2 hover:bg-indigo-600 hover:text-indigo-100 cursor-pointer"
+								:class="{'bg-indigo-600 text-indigo-100': (feature.properties.id === lookupKoperasi)}"
+								@click="(feature.properties.id === lookupKoperasi) ? null : [flyTo([...feature.geometry.coordinates].reverse()), lookupKoperasi = feature.properties.id]">
+								<div class="col-span-1">
+									<img class="w-12 h-12 rounded-lg ml-4 flex-grow flex-shrink-0"
+										:src="[`https://ui-avatars.com/api/?name=${feature.properties.name.split(' ').join('+')}&background=4C51BF&color=FAF5FF`]"
+										alt="example-logo">
+								</div>
+								<div class="ml-4 p-1 col-span-5">
+									<p x-text="feature.properties.name">Koperasi Ika Cipta Persada</p>
+									<div class="text-xs break-words">
+										<span x-text="feature.properties.alamat"></span>
+										<span x-text="feature.properties.gampong"></span>,
+										<span x-text="feature.properties.kabupaten"></span>
+									</div>
+									<div class="flex mt-2">
+										<span class="bg-gray-400 text-gray-600 text-xs rounded p-1 mr-1 font-bold">
+											1.7 km
+										</span>
+										<span class="bg-green-400 text-green-100 text-xs rounded p-1 font-bold">
+											<svg class="w-6 h-6 inline" fill="none" stroke="currentColor"
+												viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+													d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+												</path>
+											</svg>
+											kop. simpan pinjam
+										</span>
+									</div>
+								</div>
 							</div>
-							<div class="flex mt-2">
-								<span class="bg-gray-400 text-gray-600 text-xs rounded p-1 mr-1 font-bold">
-									1.7 km
-								</span>
-								<span class="bg-green-400 text-green-100 text-xs rounded p-1 font-bold">
-									<svg class="w-6 h-6 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-										xmlns="http://www.w3.org/2000/svg">
-										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-											d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
-										</path>
-									</svg>
-									kop. simpan pinjam
-								</span>
-							</div>
-						</div>
+						</template>
 					</div>
-				</template>
-			</div>
+				</div>
+			</template>
 
 		</aside>
 
@@ -189,8 +209,9 @@
 				features: [],
 				mapMarkers: [],
 				onFilter: false,
-				isReady: false,
+				isLoading: true,
 				lookupKoperasi: null,
+				q: null,
 				addTile: function () {
 					L.tileLayer(
 						'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
@@ -208,6 +229,7 @@
 					const filter = {
 						kota: (this.kotaFilterComponent.selectedCity && this.kotaFilterComponent.selectedCity.id) ||
 							null,
+						q: this.q || null
 					}
 					return new Promise(async (resolve, reject) => {
 						try {
@@ -246,7 +268,7 @@
 											</div>`).on(
 											'click',
 											function (e) {
-												
+
 												$this.lookupKoperasi = JSON.parse(JSON
 													.stringify(feature)).properties.id
 											});
@@ -276,6 +298,8 @@
 				},
 				render: async function () {
 					try {
+						this.isLoading = true
+
 						if (this.features.length) {
 							await this.removeMarkers()
 						}
@@ -289,7 +313,10 @@
 
 					} catch (error) {
 						console.log(error)
+					} finally {
+						this.isLoading = false
 					}
+					
 				},
 				initMap: function () {
 					this.addTile()

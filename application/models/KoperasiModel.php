@@ -12,6 +12,10 @@ class KoperasiModel extends CI_Model {
         if ($this->input->get('kota') != null) {
             $query->where('kabupaten', $this->input->get('kota'));
         }
+
+        if ($this->input->get('q') != null) {
+            $query->like('kop.nama', $this->input->get('q'));
+        }
         return $query->get()->result();
     }
 
