@@ -138,11 +138,9 @@
 
 			<div class="max-h-full w-full overflow-y-auto" style="height: 60%;">
 				<template x-for="(feature, i) in features" :key="i">
-					<div
-						class="grid grid-cols-6 items-center mb-3 shadow-lg bg-white rounded-lg p-2 hover:bg-indigo-600 hover:text-indigo-100 cursor-pointer"
+					<div class="grid grid-cols-6 items-center mb-3 shadow-lg bg-white rounded-lg p-2 hover:bg-indigo-600 hover:text-indigo-100 cursor-pointer"
 						:class="{'bg-indigo-600 text-indigo-100': (feature.properties.id === lookupKoperasi)}"
-						@click="(feature.properties.id === lookupKoperasi) ? null : [flyTo([...feature.geometry.coordinates].reverse()), lookupKoperasi = feature.properties.id]"
-						>
+						@click="(feature.properties.id === lookupKoperasi) ? null : [flyTo([...feature.geometry.coordinates].reverse()), lookupKoperasi = feature.properties.id]">
 						<div class="col-span-1">
 							<img class="w-12 h-12 rounded-lg ml-4 flex-grow flex-shrink-0"
 								:src="[`https://ui-avatars.com/api/?name=${feature.properties.name.split(' ').join('+')}&background=4C51BF&color=FAF5FF`]"
@@ -177,12 +175,16 @@
 		</aside>
 
 		<div id="map" class="col-span-8 h-full"></div>
+
+
+
 	</div>
 
 	<script>
 		function app() {
 			return {
 				tokenMap: 'pk.eyJ1IjoieW9nYWFsdGFyaXoiLCJhIjoiY2tjdzI3M3k0MDl1ejJ2bGE0Y3l0M3FoeCJ9.4t6IoUSf2tqc1hjdRC7KhQ',
+				initPoint: [5.548290, 95.323753],
 				map: L.map('map').setView([5.548290, 95.323753], 13),
 				features: [],
 				mapMarkers: [],
@@ -238,11 +240,15 @@
 										const marker = L.marker(latlng, {
 											icon: customIcon
 										}).bindPopup(
-											"<b>Hello world!</b><br>I am a popup.").on(
+											`<div> 
+												<span class='font-bold leading-none block mb-2'>${feature.properties.name}</span> 
+												<span class="text-gray-600">${feature.properties.alamat} ${feature.properties.gampong} ${feature.properties.kecamatan}</span>
+											</div>`).on(
 											'click',
 											function (e) {
-												console.log(JSON.parse(JSON.stringify(feature)));
-												$this.lookupKoperasi = JSON.parse(JSON.stringify(feature)).properties.id
+												
+												$this.lookupKoperasi = JSON.parse(JSON
+													.stringify(feature)).properties.id
 											});
 										$this.mapMarkers.push(marker)
 										return marker
@@ -315,10 +321,10 @@
 
 				getDistance: function (origin, destination) {
 					// return distance in meters
-					var lon1 = toRadian(origin[1]),
-						lat1 = toRadian(origin[0]),
-						lon2 = toRadian(destination[1]),
-						lat2 = toRadian(destination[0]);
+					var lon1 = this.toRadian(origin[1]),
+						lat1 = this.toRadian(origin[0]),
+						lon2 = this.toRadian(destination[1]),
+						lat2 = this.toRadian(destination[0]);
 
 					var deltaLat = lat2 - lat1;
 					var deltaLon = lon2 - lon1;
