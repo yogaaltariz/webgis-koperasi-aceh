@@ -128,24 +128,25 @@
 							ditemukan di
 							<span x-text="kotaFilterComponent.selectedCity.nama"></span>
 						</span>
-					</template> 
+					</template>
 					<template x-if="kotaFilterComponent.selectedCity === null">
 						<span>untuk seluruh aceh ditampilkan</span>
 					</template>
 				</span>
 			</p>
 
-		
-			<template x-for="(feature, i) in features" :key="i">
-				<div class="max-h-full w-full overflow-y-auto" style="height: 60%;">
-					<div @click="flyTo(feature.geometry.coordinates.reverse())" class="shadow bg-white rounded-lg p-2 flex flex-wrap items-center mb-3 hover:bg-indigo-600 hover:text-indigo-100 cursor-pointer">
-						<img class="w-16 h-16 rounded-lg"
-							src="https://ui-avatars.com/api/?name=Koperasi+Ika+Cipta+Persada&background=4C51BF&color=FAF5FF"
+
+			<div class="max-h-full w-full overflow-y-auto" style="height: 60%;">
+				<template x-for="(feature, i) in features" :key="i">
+					<div class="grid grid-cols-6 items-center mb-3 shadow-lg bg-white rounded-lg p-2 hover:bg-indigo-600 hover:text-indigo-100 cursor-pointer">
+						<div class="col-span-1">
+							<img class="w-12 h-12 rounded-lg ml-4 flex-grow flex-shrink-0"
+							:src="[`https://ui-avatars.com/api/?name=${feature.properties.name.split(' ').join('+')}&background=4C51BF&color=FAF5FF`]"
 							alt="example-logo">
-	
-						<div class="ml-4">
+						</div>
+						<div class="ml-4 p-1 col-span-5">
 							<p x-text="feature.properties.name">Koperasi Ika Cipta Persada</p>
-							<div class="text-xs" >
+							<div class="text-xs break-words">
 								<span x-text="feature.properties.alamat"></span>
 								<span x-text="feature.properties.gampong"></span>,
 								<span x-text="feature.properties.kabupaten"></span>
@@ -166,9 +167,8 @@
 							</div>
 						</div>
 					</div>
-				</div>
-			</template>
-
+				</template>
+			</div>
 
 		</aside>
 
@@ -300,7 +300,28 @@
 						this.selectedCity = null
 						this.input = null
 					}
+				},
+
+				getDistance: function (origin, destination) {
+					// return distance in meters
+					var lon1 = toRadian(origin[1]),
+						lat1 = toRadian(origin[0]),
+						lon2 = toRadian(destination[1]),
+						lat2 = toRadian(destination[0]);
+
+					var deltaLat = lat2 - lat1;
+					var deltaLon = lon2 - lon1;
+
+					var a = Math.pow(Math.sin(deltaLat / 2), 2) + Math.cos(lat1) * Math.cos(lat2) * Math.pow(Math.sin(
+						deltaLon / 2), 2);
+					var c = 2 * Math.asin(Math.sqrt(a));
+					var EARTH_RADIUS = 6371;
+					return c * EARTH_RADIUS * 1000;
+				},
+				toRadian: function (degree) {
+					return degree * Math.PI / 180;
 				}
+				// var distance = getDistance([lat1, lng1], [lat2, lng2])
 			}
 		}
 		const App = app()
