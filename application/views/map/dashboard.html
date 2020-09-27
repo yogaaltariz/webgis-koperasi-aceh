@@ -22,15 +22,17 @@
 			right: -1px;
 			max-height: 400px;
 		}
+
 	</style>
 	<title>Pinit</title>
 
 	<script>
 		const BASE_URL = "http://localhost/koperasi/"
+
 	</script>
 </head>
 
-<body class="text-gray-700 overflow-hidden" x-data="App">
+<body class="text-gray-700 overflow-hidden" x-data="App" x-init="() => initMap()">
 	<div class="grid grid-cols-12 h-screen">
 		<aside class="col-span-4 h-full bg-white shadow p-4 bg-gray-100">
 			<div class="py-3 flex justify-between">
@@ -113,63 +115,61 @@
 
 				</button>
 			</div>
-			<template x-if="kotaFilterComponent.selectedCity !== null">
-				<p class="my-5 text-lg font-bold">
-					<span x-text="features.length"></span> Hasil <span class="text-gray-500">ditemukan di <span
-							x-text="kotaFilterComponent.selectedCity.nama"></span></span>
-				</p>
+
+
+			<!-- <p class="my-5 text-lg font-bold">
+				<span x-text="features.length"></span> Hasil <span class="text-gray-500">ditemukan di dekat
+					anda</span>
+			</p> -->
+			<p class="my-5 text-lg font-bold">
+				<span x-text="features.length"></span> Hasil <span class="text-gray-500">
+					<template x-if="kotaFilterComponent.selectedCity !== null">
+						<span>
+							ditemukan di
+							<span x-text="kotaFilterComponent.selectedCity.nama"></span>
+						</span>
+					</template> 
+					<template x-if="kotaFilterComponent.selectedCity === null">
+						<span>untuk seluruh aceh ditampilkan</span>
+					</template>
+				</span>
+			</p>
+
+		
+			<template x-for="(feature, i) in features" :key="i">
+				<div class="max-h-full w-full overflow-y-auto" style="height: 60%;">
+					<div @click="flyTo(feature.geometry.coordinates.reverse())" class="shadow bg-white rounded-lg p-2 flex flex-wrap items-center mb-3 hover:bg-indigo-600 hover:text-indigo-100 cursor-pointer">
+						<img class="w-16 h-16 rounded-lg"
+							src="https://ui-avatars.com/api/?name=Koperasi+Ika+Cipta+Persada&background=4C51BF&color=FAF5FF"
+							alt="example-logo">
+	
+						<div class="ml-4">
+							<p x-text="feature.properties.name">Koperasi Ika Cipta Persada</p>
+							<div class="text-xs" >
+								<span x-text="feature.properties.alamat"></span>
+								<span x-text="feature.properties.gampong"></span>,
+								<span x-text="feature.properties.kabupaten"></span>
+							</div>
+							<div class="flex mt-2">
+								<span class="bg-gray-400 text-gray-600 text-xs rounded p-1 mr-1 font-bold">
+									1.7 km
+								</span>
+								<span class="bg-green-400 text-green-100 text-xs rounded p-1 font-bold">
+									<svg class="w-6 h-6 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+										xmlns="http://www.w3.org/2000/svg">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+											d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
+										</path>
+									</svg>
+									kop. simpan pinjam
+								</span>
+							</div>
+						</div>
+					</div>
+				</div>
 			</template>
 
-			<div class="max-h-full h-full w-full overflow-y-auto">
-				<div class="shadow bg-white rounded-lg p-2 flex flex-wrap items-center mb-3">
-					<img class="w-16 h-16 rounded-lg"
-						src="https://ui-avatars.com/api/?name=Koperasi+Ika+Cipta+Persada&background=4C51BF&color=FAF5FF"
-						alt="example-logo">
 
-					<div class="ml-4">
-						<p>Koperasi Ika Cipta Persada</p>
-						<p class="text-xs">Lorem ipsum dolor sit amet consectetur adipisicing.</p>
-						<div class="flex mt-2">
-							<span class="bg-gray-400 text-gray-600 text-xs rounded p-1 mr-1 font-bold">
-								1.7 km
-							</span>
-							<span class="bg-green-400 text-green-100 text-xs rounded p-1 font-bold">
-								<svg class="w-6 h-6 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-									xmlns="http://www.w3.org/2000/svg">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-										d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
-									</path>
-								</svg>
-								kop. simpan pinjam
-							</span>
-						</div>
-					</div>
-				</div>
-				<div class="shadow bg-white rounded-lg p-2 flex flex-wrap items-center mb-3">
-					<img class="w-16 h-16 rounded-lg"
-						src="https://ui-avatars.com/api/?name=Koperasi+Ika+Cipta+Persada&background=4C51BF&color=FAF5FF"
-						alt="example-logo">
-
-					<div class="ml-4">
-						<p>Koperasi Ika Cipta Persada</p>
-						<p class="text-xs">Lorem ipsum dolor sit amet consectetur adipisicing.</p>
-						<div class="flex mt-2">
-							<span class="bg-gray-400 text-gray-600 text-xs rounded p-1 mr-1 font-bold">
-								1.7 km
-							</span>
-							<span class="bg-green-400 text-green-100 text-xs rounded p-1 font-bold">
-								<svg class="w-6 h-6 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-									xmlns="http://www.w3.org/2000/svg">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-										d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z">
-									</path>
-								</svg>
-								kop. simpan pinjam
-							</span>
-						</div>
-					</div>
-				</div>
-			</div>
 		</aside>
 
 		<div id="map" class="col-span-8 h-full"></div>
@@ -182,6 +182,8 @@
 				map: L.map('map').setView([5.548290, 95.323753], 13),
 				features: [],
 				mapMarkers: [],
+				onFilter: false,
+				isReady: false,
 				addTile: function () {
 					L.tileLayer(
 						'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
@@ -264,8 +266,8 @@
 						await this.AddMarkers()
 
 						if (this.kotaFilterComponent.selectedCity && this.features.length) {
-                            const originalFeature = JSON.parse(JSON.stringify(this.features[0]))
-                            this.map.flyTo(originalFeature.geometry.coordinates.reverse(), 16)
+							const originalFeature = JSON.parse(JSON.stringify(this.features[0]))
+							this.map.flyTo(originalFeature.geometry.coordinates.reverse(), 16)
 						}
 
 					} catch (error) {
@@ -279,6 +281,11 @@
 						position: 'bottomright'
 					}).addTo(this.map);
 					this.render()
+
+					this.isReady = true
+				},
+				flyTo(coordinates) {
+					this.map.flyTo(coordinates, 16)
 				},
 				kotaFilterComponent: {
 					open: false,
@@ -297,7 +304,8 @@
 			}
 		}
 		const App = app()
-		App.initMap()
+		// App.initMap()
+
 	</script>
 </body>
 
